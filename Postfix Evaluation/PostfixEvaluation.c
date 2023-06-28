@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#define MAX_SIZE 101
 
 // Function to evaluate Postfix expression and return output
 int EvaluatePostfix(char* expression);
@@ -23,30 +22,34 @@ bool IsOperator(char C);
 bool IsNumericDigit(char C);
 
 // Stack to store the operator
-int array[MAX_SIZE];
-int top = -1;
-
+typedef struct Node {
+    int data;
+    struct Node* next;
+} node;
+node* head = NULL;
 void Push(int value_) {
-    if (top == MAX_SIZE - 1) return;
-    array[++top] = value_;
+    node* temp = (node*)malloc(sizeof(node));
+    temp->data = value_;
+    temp->next = head;
+    head = temp;
 }
 
 int Pop() {
-    if (top == -1) return 0;
-    return array[top--];
-}
-
-int Top() {
-    return array[top];
+    int data;
+    node* temp = head;
+    if (head == NULL) return -1;
+    data = head->data;
+    head = head->next;
+    free(temp);
+    return data;
 }
 
 int main() {
-    char* expression = (char*)malloc(MAX_SIZE * sizeof(char));
+    char expression[20];
     printf("Enter Postfix Expression \n");
     scanf("%s", expression);
     int result = EvaluatePostfix(expression);
     printf("Output = %d\n", result);
-    free(expression);
     return 0;
 }
 
@@ -63,7 +66,7 @@ int EvaluatePostfix(char* expression) {
             int operand2 = Pop();
             int operand1 = Pop();
             // Perform operation
-            int result = PerformOperation(expression[i], operand1, operand2);
+            int result = PerformOperation(*(expression+i), operand1, operand2);
             // Push back result of operation on stack
             Push(result);
         }
@@ -87,14 +90,7 @@ int EvaluatePostfix(char* expression) {
 			Push(operand);
         }
     }
-    // If expression is in correct format, Stack will finally have one element. This will be the output. 
-	if (top != -1) {
-        int result = Top();
-        top = -1;
-        return result;
-    }
-    printf("Invalid postfix expression. \n");
-    return 0;
+    return head->data;
 }
 
 bool IsNumericDigit(char C) {
